@@ -34,15 +34,17 @@ function AppShell() {
 
   // Ready — full app with routing
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/lessons" element={<LessonsPage />} />
-        <Route path="/tutor" element={<ChatPage engine={engine} />} />
-        <Route path="/brain-sync" element={<BrainSyncPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+    <div className="min-h-screen bg-primary text-text">
+      <div className="container-responsive pb-20 pt-8">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/lessons" element={<LessonsPage />} />
+          <Route path="/tutor" element={<ChatPage engine={engine} />} />
+          <Route path="/brain-sync" element={<BrainSyncPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
       <BottomNav />
     </div>
   );

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Wifi, WifiOff, CheckCircle2, Library, Clock, HelpCircle, ChevronRight, Calculator, FlaskConical, ScrollText, BookOpen } from "lucide-react";
 import {
   LESSONS,
   SUBJECT_META,
@@ -17,6 +18,13 @@ const FILTERS: { key: Filter; label: string }[] = [
   { key: "history", label: "History" },
   { key: "reading", label: "Reading" },
 ];
+
+const SUBJECT_ICONS: Record<string, any> = {
+  Calculator,
+  FlaskConical,
+  ScrollText,
+  BookOpen
+};
 
 export default function LessonsPage() {
   const [activeFilter, setActiveFilter] = useState<Filter>("all");
@@ -36,47 +44,38 @@ export default function LessonsPage() {
   const isOnline = navigator.onLine;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24">
+    <div className="space-y-8 pb-12">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-5 pt-5 pb-3">
-        <div className="flex items-center justify-between mb-4">
+      <header className="flex flex-col gap-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold tracking-tight">Your Library</h1>
           <div className="flex items-center gap-3">
-            <button className="material-symbols-outlined text-slate-900 dark:text-white text-2xl">
-              menu
-            </button>
-            <h1 className="text-lg font-bold text-slate-900 dark:text-white">
-              Sync'd Lessons
-            </h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <span
-              className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+             <span
+              className={`inline-flex items-center gap-1 text-[10px] font-bold tracking-widest px-2.5 py-1 rounded-full border ${
                 isOnline
-                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400"
-                  : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                  ? "bg-blue-50 text-blue-700 border-blue-100"
+                  : "bg-emerald-50 text-emerald-700 border-emerald-100"
               }`}
             >
-              <span className="material-symbols-outlined text-[12px]">
-                {isOnline ? "wifi" : "wifi_off"}
-              </span>
+              {isOnline ? <Wifi size={12} /> : <WifiOff size={12} />}
               {isOnline ? "ONLINE" : "OFFLINE"}
             </span>
-            <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">
+            <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center text-white text-sm font-bold shadow-sm">
               S
             </div>
           </div>
         </div>
 
         {/* Filter chips */}
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-5 px-5 pb-1">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4 pb-1 sm:mx-0 sm:px-0">
           {FILTERS.map(({ key, label }) => (
             <button
               key={key}
               onClick={() => setActiveFilter(key)}
-              className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold border-2 transition-colors ${
+              className={`shrink-0 px-5 py-2 rounded-full text-xs font-semibold transition-all border ${
                 activeFilter === key
-                  ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white"
-                  : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700 hover:border-slate-400"
+                  ? "bg-accent text-white border-accent shadow-sm"
+                  : "bg-white text-text-subtle border-border hover:border-accent hover:text-accent"
               }`}
             >
               {label}
@@ -87,87 +86,85 @@ export default function LessonsPage() {
 
       {/* ── Continue Learning card ─────────────────────────────── */}
       {continueLesson && (
-        <section className="px-5 mt-5">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Continue Learning
-            </h2>
-            <span className="text-[10px] text-slate-400 uppercase tracking-wider">
-              Last Viewed
-            </span>
-          </div>
+        <section>
+          <h2 className="text-xs font-bold uppercase tracking-widest text-text-subtle mb-4">
+            Pick up where you left off
+          </h2>
           <Link
             to={`/tutor?subject=${continueLesson.subject}&lesson=${continueLesson.id}`}
-            className="block rounded-2xl bg-slate-900 dark:bg-slate-800 p-5 text-white"
+            className="group block card bg-slate-900 border-none text-white hover:shadow-lg transition-all"
           >
-            <div className="flex items-center gap-2 mb-3">
-              <span
-                className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md ${SUBJECT_META[continueLesson.subject].bgColor} ${SUBJECT_META[continueLesson.subject].color}`}
-              >
-                {SUBJECT_META[continueLesson.subject].label}
-              </span>
-              {continueLesson.synced && (
-                <span className="flex items-center gap-0.5 text-emerald-400 text-[10px] font-semibold">
-                  <span className="material-symbols-outlined text-[14px]">
-                    check_circle
-                  </span>
-                  READY
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <span
+                  className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full ${SUBJECT_META[continueLesson.subject].bgColor} ${SUBJECT_META[continueLesson.subject].color}`}
+                >
+                  {SUBJECT_META[continueLesson.subject].label}
                 </span>
-              )}
-            </div>
-            <h3 className="text-xl font-bold">
-              Week {continueLesson.week}: {continueLesson.title}
-            </h3>
-            <div className="flex items-center justify-between mt-4 text-xs text-slate-300">
-              <span>{continueLesson.progressPercent}% Complete</span>
-              <span>
-                {Math.round(
-                  (continueLesson.durationMins *
-                    (100 - continueLesson.progressPercent)) /
-                    100,
+                {continueLesson.synced && (
+                  <span className="flex items-center gap-1 text-emerald-400 text-[10px] font-bold tracking-wider">
+                    <CheckCircle2 size={14} />
+                    SYNCED
+                  </span>
                 )}
-                m left
-              </span>
-            </div>
-            <div className="mt-1.5 h-1.5 bg-slate-700 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-blue-500 rounded-full transition-all"
-                style={{ width: `${continueLesson.progressPercent}%` }}
-              />
+              </div>
+              <h3 className="text-xl font-bold group-hover:text-accent transition-colors">
+                Week {continueLesson.week}: {continueLesson.title}
+              </h3>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
+                  <span>{continueLesson.progressPercent}% Complete</span>
+                  <span>
+                    {Math.round(
+                      (continueLesson.durationMins *
+                        (100 - continueLesson.progressPercent)) /
+                        100,
+                    )}
+                    m left
+                  </span>
+                </div>
+                <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-accent rounded-full transition-all duration-500"
+                    style={{ width: `${continueLesson.progressPercent}%` }}
+                  />
+                </div>
+              </div>
             </div>
           </Link>
         </section>
       )}
 
       {/* ── Up Next list ───────────────────────────────────────── */}
-      <section className="px-5 mt-6">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
-          Up Next
+      <section>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-text-subtle mb-4">
+          All Lessons
         </h2>
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {upNext.map((lesson) => (
             <LessonCard key={lesson.id} lesson={lesson} />
           ))}
           {upNext.length === 0 && (
-            <p className="text-sm text-slate-400 text-center py-8">
-              No lessons for this filter
-            </p>
+            <div className="col-span-full py-12 card bg-surface border-dashed flex flex-col items-center justify-center text-text-subtle">
+               <Library size={40} className="mb-2" />
+               <p className="text-sm font-medium">No lessons found for this subject.</p>
+            </div>
           )}
         </div>
       </section>
 
       {/* ── Study Tip ──────────────────────────────────────────── */}
-      <section className="px-5 mt-6">
-        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-4">
-          <div className="flex items-start gap-3">
-            <span className="text-2xl">💡</span>
+      <section>
+        <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-6">
+          <div className="flex items-start gap-4">
+            <div className="bg-white p-2 rounded-xl shadow-sm">
+              <span className="text-xl">💡</span>
+            </div>
             <div>
-              <p className="text-sm font-bold text-amber-900 dark:text-amber-200">
-                Study Tip
-              </p>
-              <p className="text-xs text-amber-800 dark:text-amber-300 mt-1 leading-relaxed">
+              <p className="text-sm font-bold text-blue-900 mb-1">Study Tip</p>
+              <p className="text-xs text-blue-800 leading-relaxed opacity-80">
                 Stuck on a problem? Try explaining it out loud to the AI Tutor.
-                Articulating the steps often reveals the solution.
+                Articulating the steps often reveals the solution and builds deeper understanding.
               </p>
             </div>
           </div>
@@ -180,51 +177,47 @@ export default function LessonsPage() {
 // ── Lesson card component ──────────────────────────────────────────
 function LessonCard({ lesson }: { lesson: Lesson }) {
   const meta = SUBJECT_META[lesson.subject];
+  const Icon = SUBJECT_ICONS[meta.icon];
   return (
     <Link
       to={`/tutor?subject=${lesson.subject}&lesson=${lesson.id}`}
-      className="flex items-center gap-3 bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
+      className="group flex items-center gap-4 card hover:border-accent transition-all"
     >
       {/* Subject icon */}
       <div
-        className={`w-12 h-12 rounded-xl ${meta.bgColor} flex items-center justify-center shrink-0`}
+        className={`w-14 h-14 rounded-2xl ${meta.bgColor} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}
       >
-        <span className={`material-symbols-outlined text-2xl ${meta.color}`}>
-          {meta.icon}
-        </span>
+        {Icon && <Icon size={30} className={meta.color} />}
       </div>
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+        <div className="flex items-center gap-2 mb-0.5">
+          <p className="text-sm font-bold text-text truncate group-hover:text-accent transition-colors">
             {lesson.title}
           </p>
           {lesson.synced && (
-            <span className="material-symbols-outlined text-emerald-500 text-[16px] shrink-0">
-              check_circle
-            </span>
+            <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
           )}
         </div>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+        <p className="text-xs text-text-subtle font-medium">
           {meta.label} · Week {lesson.week}
         </p>
-        <div className="flex items-center gap-2 mt-1.5">
-          <span className="inline-flex items-center px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-semibold rounded-md">
-            {lesson.durationMins} mins
-          </span>
+        <div className="flex items-center gap-3 mt-2">
+          <div className="flex items-center gap-1 text-[10px] font-bold text-text-subtle uppercase tracking-wider">
+            <Clock size={14} />
+            {lesson.durationMins}m
+          </div>
           {lesson.hasQuiz && (
-            <span className="inline-flex items-center px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-semibold rounded-md">
-              Quiz included
-            </span>
+             <div className="flex items-center gap-1 text-[10px] font-bold text-accent uppercase tracking-wider">
+               <HelpCircle size={14} />
+               Quiz
+             </div>
           )}
         </div>
       </div>
 
-      {/* Chevron */}
-      <span className="material-symbols-outlined text-slate-400 text-xl shrink-0">
-        chevron_right
-      </span>
+      <ChevronRight size={20} className="text-border group-hover:text-accent transition-colors" />
     </Link>
   );
 }

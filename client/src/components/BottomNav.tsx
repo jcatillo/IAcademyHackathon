@@ -1,47 +1,46 @@
 import { NavLink } from "react-router-dom";
+import { Home, BookOpen, Brain, User } from "lucide-react";
 
 const NAV_ITEMS = [
-  { to: "/", icon: "home", label: "Home" },
-  { to: "/lessons", icon: "menu_book", label: "Lessons" },
-  { to: "/tutor", icon: "psychology", label: "Tutor" },
-  { to: "/profile", icon: "person", label: "Profile" },
+  { to: "/", icon: Home, label: "Home" },
+  { to: "/lessons", icon: BookOpen, label: "Lessons" },
+  { to: "/tutor", icon: Brain, label: "Tutor" },
+  { to: "/profile", icon: User, label: "Profile" },
 ] as const;
 
 export default function BottomNav() {
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-50 bg-white dark:bg-slate-900 border-t-2 border-slate-200 dark:border-slate-700 pb-[env(safe-area-inset-bottom)]">
-      <ul className="flex justify-around items-center h-16 max-w-lg mx-auto">
-        {NAV_ITEMS.map(({ to, icon, label }) => (
-          <li key={to}>
+    <nav className="fixed bottom-0 inset-x-0 z-50 bg-white border-t border-border pb-[env(safe-area-inset-bottom)] shadow-sm">
+      <ul className="flex justify-around items-center h-16 max-w-lg mx-auto px-4">
+        {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
+          <li key={to} className="flex-1">
             <NavLink
               to={to}
               end={to === "/"}
               className={({ isActive }) =>
-                `flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors ${
+                `relative flex flex-col items-center gap-1 py-2 transition-all duration-200 ${
                   isActive
-                    ? "text-blue-600 dark:text-blue-400"
-                    : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
+                    ? "text-accent"
+                    : "text-text-subtle hover:text-text"
                 }`
               }
             >
               {({ isActive }) => (
                 <>
+                  <Icon
+                    size={24}
+                    strokeWidth={isActive ? 2.5 : 2}
+                    className="transition-transform duration-200"
+                  />
                   <span
-                    className={`material-symbols-outlined text-[24px] ${
-                      isActive ? "font-bold" : ""
-                    }`}
-                  >
-                    {icon}
-                  </span>
-                  <span
-                    className={`text-[10px] font-semibold ${
-                      isActive ? "text-blue-600 dark:text-blue-400" : ""
+                    className={`text-[10px] font-medium tracking-tight ${
+                      isActive ? "font-semibold" : ""
                     }`}
                   >
                     {label}
                   </span>
                   {isActive && (
-                    <span className="absolute -top-0.5 w-8 h-1 rounded-full bg-blue-600 dark:bg-blue-400" />
+                    <span className="absolute top-0 w-8 h-0.5 bg-accent rounded-full transition-all" />
                   )}
                 </>
               )}

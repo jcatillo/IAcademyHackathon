@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PlusSquare, Download, Info } from "lucide-react";
 import { usePwaInstall } from "../hooks/usePwaInstall";
 
 const INSTALLED_KEY = "invisible-schoolhouse-installed";
@@ -45,73 +46,66 @@ export default function InstallPrompt({ onDone }: InstallPromptProps) {
   };
 
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-gray-950 px-6 text-center">
+    <div className="flex min-h-svh flex-col items-center justify-center gap-10 bg-primary px-6 text-center animate-in fade-in duration-700">
       {/* Success badge */}
-      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/30">
-        <span className="text-3xl">✅</span>
+      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50 border border-emerald-100 shadow-sm shadow-emerald-500/10">
+        <span className="text-4xl">✅</span>
       </div>
 
-      <div className="max-w-sm">
-        <h1 className="text-xl font-bold text-white">AI Tutor Ready</h1>
-        <p className="mt-2 text-sm leading-relaxed text-gray-400">
-          The AI model and app are saved to your device. Install it so you can
-          open it anytime —{" "}
-          <span className="font-medium text-white">
-            even without Wi-Fi or the teacher's server
-          </span>
-          .
+      <div className="max-w-sm space-y-4">
+        <h1 className="text-3xl font-bold tracking-tight">AI Tutor Ready</h1>
+        <p className="text-sm leading-relaxed text-text-subtle font-medium">
+          The models are synced. Install the app to access your lessons{" "}
+          <span className="font-bold text-accent">anytime, anywhere</span>, even without a network connection.
         </p>
       </div>
 
       {/* iOS instructions */}
       {isIOS && (
-        <div className="w-full max-w-sm rounded-2xl bg-gray-800 p-4 ring-1 ring-white/10 text-left">
-          <p className="text-sm font-semibold text-white">
-            📲 Add to Home Screen
+        <div className="w-full max-w-sm card bg-surface p-6 text-left border-dashed">
+          <p className="text-sm font-bold flex items-center gap-2 mb-2">
+            <PlusSquare size={18} className="text-accent" />
+            Add to Home Screen
           </p>
-          <p className="mt-1 text-xs leading-relaxed text-gray-400">
-            Tap{" "}
-            <span className="inline-flex items-center gap-0.5 rounded bg-white/10 px-1.5 py-0.5 font-medium text-white">
-              <ShareIcon /> Share
-            </span>{" "}
-            then select{" "}
-            <span className="font-medium text-white">"Add to Home Screen"</span>
+          <p className="text-xs leading-relaxed text-text-subtle font-medium">
+            Tap the <span className="bg-white px-2 py-0.5 rounded border border-border inline-flex items-center gap-1 font-bold text-accent"><ShareIcon /> share button</span> then select <span className="font-bold text-text">"Add to Home Screen"</span>.
           </p>
         </div>
       )}
 
       {/* Install button */}
       {!isIOS && (
-        <button
-          onClick={handleInstall}
-          disabled={installing}
-          className="flex items-center gap-2 rounded-xl bg-sky-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-sky-600/25 transition hover:bg-sky-500 active:scale-95 disabled:opacity-50"
-        >
-          <span className="text-lg">📥</span>
-          {installing ? "Installing…" : "Install App"}
-        </button>
+        <div className="w-full max-w-sm flex flex-col gap-4">
+          <button
+            onClick={handleInstall}
+            disabled={installing}
+            className="btn-accent w-full py-4 text-base flex items-center justify-center gap-3 shadow-lg shadow-accent/20 disabled:shadow-none disabled:bg-border"
+          >
+            <Download size={20} />
+            {installing ? "Installing…" : "Install Native App"}
+          </button>
+        </div>
       )}
 
       {/* Manual fallback instructions */}
       {showManual && (
-        <div className="w-full max-w-sm rounded-2xl bg-amber-900/20 p-4 ring-1 ring-amber-500/20 text-left">
-          <p className="text-sm font-semibold text-amber-300">
-            Add to Home Screen manually
+        <div className="w-full max-w-sm card bg-amber-50 border-amber-100 p-6 text-left">
+          <p className="text-sm font-bold text-amber-900 mb-3 flex items-center gap-2">
+            <Info size={16} />
+            Manual Installation
           </p>
-          <ol className="mt-2 space-y-1 text-xs leading-relaxed text-gray-400">
-            <li>
-              1. Tap the <span className="font-medium text-white">⋮ menu</span>{" "}
-              (top-right corner in Chrome)
+          <ol className="space-y-3 text-xs text-amber-900/70 font-medium">
+            <li className="flex gap-2">
+              <span className="font-bold text-amber-700">1.</span>
+              <span>Open the <span className="font-bold">browser menu</span> (the three dots ⋮ in the top corner)</span>
             </li>
-            <li>
-              2. Select{" "}
-              <span className="font-medium text-white">"Install app"</span> or{" "}
-              <span className="font-medium text-white">
-                "Add to Home Screen"
-              </span>
+            <li className="flex gap-2">
+              <span className="font-bold text-amber-700">2.</span>
+              <span>Select <span className="font-bold text-text">"Install app"</span> or <span className="font-bold text-text">"Add to Home Screen"</span></span>
             </li>
-            <li>
-              3. Tap <span className="font-medium text-white">"Install"</span>
+            <li className="flex gap-2">
+              <span className="font-bold text-amber-700">3.</span>
+              <span>Confirm the installation dialog</span>
             </li>
           </ol>
         </div>
@@ -120,11 +114,29 @@ export default function InstallPrompt({ onDone }: InstallPromptProps) {
       {/* Skip / Continue */}
       <button
         onClick={handleSkip}
-        className="text-xs text-gray-500 underline decoration-gray-700 underline-offset-2 transition hover:text-gray-300"
+        className="text-xs font-bold text-text-subtle hover:text-accent transition-colors uppercase tracking-[0.2em] pt-4"
       >
-        {showManual || isIOS ? "Continue to Chat →" : "Skip for now"}
+        {showManual || isIOS ? "Continue to Hub →" : "Skip for now"}
       </button>
     </div>
+  );
+}
+
+function ShareIcon() {
+  return (
+    <svg
+      className="h-3.5 w-3.5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 3v12M8 7l4-4 4 4"
+      />
+    </svg>
   );
 }
 

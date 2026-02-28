@@ -21,27 +21,27 @@ export const SUBJECT_META: Record<
 > = {
   math: {
     label: "Math",
-    icon: "calculate",
+    icon: "Calculator",
     color: "text-blue-600",
-    bgColor: "bg-blue-100 dark:bg-blue-900/40",
+    bgColor: "bg-blue-50",
   },
   science: {
     label: "Science",
-    icon: "science",
+    icon: "FlaskConical",
     color: "text-emerald-600",
-    bgColor: "bg-emerald-100 dark:bg-emerald-900/40",
+    bgColor: "bg-emerald-50",
   },
   history: {
     label: "History",
-    icon: "history_edu",
+    icon: "ScrollText",
     color: "text-amber-600",
-    bgColor: "bg-amber-100 dark:bg-amber-900/40",
+    bgColor: "bg-amber-50",
   },
   reading: {
     label: "Reading",
-    icon: "auto_stories",
+    icon: "BookOpen",
     color: "text-purple-600",
-    bgColor: "bg-purple-100 dark:bg-purple-900/40",
+    bgColor: "bg-purple-50",
   },
 };
 

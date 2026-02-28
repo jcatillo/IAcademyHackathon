@@ -1,1 +1,53 @@
 @import "tailwindcss";
+
+@theme {
+  --color-primary: #ffffff;
+  --color-surface: #f8fafc;
+  --color-accent: #4f46e5;
+  --color-accent-hover: #4338ca;
+  --color-text: #1e293b;
+  --color-text-subtle: #64748b;
+  --color-border: #e2e8f0;
+
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    @apply bg-primary text-text font-sans antialiased;
+    background-color: var(--color-primary);
+    color: var(--color-text);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+    color: var(--color-text);
+  }
+
+  /* Responsive Typography */
+  h1 { @apply text-3xl md:text-4xl; }
+  h2 { @apply text-2xl md:text-3xl; }
+  h3 { @apply text-xl md:text-2xl; }
+}
+
+@layer components {
+  .card {
+    @apply bg-white border border-border rounded-xl p-6 transition-shadow hover:shadow-sm;
+  }
+
+  .btn-accent {
+    @apply bg-accent text-white px-4 py-2 rounded-lg font-medium transition-colors hover:bg-accent-hover active:scale-95;
+  }
+
+  .btn-ghost {
+    @apply text-text-subtle hover:text-text hover:bg-surface px-4 py-2 rounded-lg transition-colors;
+  }
+
+  .container-responsive {
+    @apply max-w-4xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}

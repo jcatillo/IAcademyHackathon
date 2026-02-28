@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, Send, Brain, Calculator, FlaskConical, ScrollText, BookOpen } from "lucide-react";
 import type { WebWorkerMLCEngine } from "@mlc-ai/web-llm";
 import { SYSTEM_PROMPT } from "../lib/engine-config";
 import {
@@ -8,6 +9,13 @@ import {
   LESSONS,
   type Subject,
 } from "../lib/subjects";
+
+const SUBJECT_ICONS: Record<string, any> = {
+  Calculator,
+  FlaskConical,
+  ScrollText,
+  BookOpen
+};
 
 interface Message {
   role: "user" | "assistant";
@@ -117,90 +125,54 @@ export default function ChatPage({ engine }: ChatPageProps) {
     }
   }
 
+  const SubjectIcon = meta ? SUBJECT_ICONS[meta.icon] : Brain;
+
   return (
-    <div className="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased overflow-hidden h-screen w-full flex flex-col relative">
+    <div className="flex flex-col fixed inset-0 bg-primary z-50">
       {/* Top App Bar */}
-      <header className="flex items-center bg-surface-light dark:bg-surface-dark px-4 py-3 border-b-2 border-slate-900 dark:border-slate-700 sticky top-0 z-50">
+      <header className="flex items-center px-4 py-3 border-b border-border bg-white shrink-0">
         <button
           onClick={() => navigate(-1)}
-          className="flex size-10 shrink-0 items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          className="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-surface transition-colors"
         >
-          <span className="material-symbols-outlined text-slate-900 dark:text-slate-100">
-            arrow_back
-          </span>
+          <ArrowLeft size={20} className="text-text" />
         </button>
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <h2 className="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight">
-            {lesson
-              ? lesson.title
-              : subject
-                ? `${meta!.label} Tutor`
-                : "AI Tutor"}
+        <div className="flex-1 flex flex-col items-center">
+          <h2 className="text-text text-base font-bold leading-tight">
+            {lesson ? lesson.title : subject ? `${meta!.label} Tutor` : "AI Tutor"}
           </h2>
           <div className="flex items-center gap-1.5 mt-0.5">
             {subject && meta && (
-              <span
-                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${meta.bgColor} ${meta.color} mr-1`}
-              >
-                <span className="material-symbols-outlined text-[12px]">
-                  {meta.icon}
-                </span>
+              <span className={`text-[10px] font-bold uppercase tracking-widest ${meta.color}`}>
                 {meta.label}
               </span>
             )}
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-              Local GPU Active
-            </span>
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+            <span className="text-[10px] font-bold text-text-subtle uppercase tracking-tighter">Local Engine</span>
           </div>
         </div>
-        <div className="w-10" /> {/* spacer for symmetry */}
+        <div className="w-10" />
       </header>
-
-      {/* Offline Indicator Banner */}
-      <div className="bg-slate-900 text-white dark:bg-slate-800 w-full py-1.5 px-4 flex justify-center items-center gap-2 shadow-sm relative z-40">
-        <span className="material-symbols-outlined text-[16px]">wifi_off</span>
-        <span className="text-xs font-semibold tracking-wide uppercase">
-          Offline Mode Enabled
-        </span>
-      </div>
 
       {/* Chat Area */}
       <main
         ref={scrollRef}
-        className="flex-1 overflow-y-auto scrollbar-hide p-4 space-y-6 pb-24 bg-background-light dark:bg-background-dark"
+        className="flex-1 overflow-y-auto p-4 space-y-6 pb-8 bg-surface/30"
       >
-        {messages.length > 0 && (
-          <div className="flex justify-center my-4">
-            <span className="text-xs font-medium text-slate-400 dark:text-slate-500 bg-slate-200 dark:bg-slate-800 px-3 py-1 rounded-full">
-              Today
-            </span>
-          </div>
-        )}
-
         {messages.length === 0 && (
-          <div className="flex h-full items-center justify-center">
-            <div className="flex flex-col items-center gap-4 opacity-70">
-              <div className="bg-primary aspect-square rounded-2xl border-4 border-slate-900 dark:border-slate-100 w-20 flex items-center justify-center shadow-neubrutalism">
-                <span className="material-symbols-outlined text-white text-5xl">
-                  {meta ? meta.icon : "psychology"}
-                </span>
+          <div className="flex h-full items-center justify-center p-8">
+            <div className="flex flex-col items-center text-center gap-4 max-w-sm">
+              <div className={`p-6 rounded-3xl ${meta ? meta.bgColor : 'bg-accent/5'}`}>
+                {SubjectIcon && <SubjectIcon size={48} className={meta ? meta.color : 'text-accent'} />}
               </div>
-              <div className="text-center space-y-2">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                  {subject
-                    ? `${meta!.label} Tutor Ready`
-                    : "Socratic Tutor Ready"}
+              <div>
+                <h3 className="text-xl font-bold mb-2">
+                  {subject ? `Hello! I'm your ${meta!.label} Tutor` : "Ready to learn?"}
                 </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 max-w-xs">
+                <p className="text-sm text-text-subtle leading-relaxed">
                   {lesson
-                    ? `Let's work on "${lesson.title}". Ask me anything about this topic!`
-                    : subject
-                      ? `Ask me any ${meta!.label.toLowerCase()} question! I'll guide you step by step.`
-                      : 'Ask me a math or reading question! Try: "How do I solve 2x = 10?"'}
+                    ? `I'm here to help you with "${lesson.title}". Ask me a question to get started!`
+                    : "Ask me anything! I'll guide you step-by-step using the Socratic method."}
                 </p>
               </div>
             </div>
@@ -210,85 +182,51 @@ export default function ChatPage({ engine }: ChatPageProps) {
         {messages.map((msg, i) => (
           <div
             key={i}
-            className={`flex gap-3 group ${msg.role === "user" ? "items-end justify-end" : "items-start"}`}
+            className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}
           >
-            {msg.role === "assistant" && (
-              <div className="bg-primary aspect-square rounded-lg border-2 border-slate-900 dark:border-slate-100 w-10 shrink-0 flex items-center justify-center shadow-neubrutalism-sm">
-                <span className="material-symbols-outlined text-white text-xl">
-                  psychology
-                </span>
-              </div>
-            )}
-
             <div
-              className={`flex flex-col gap-1 max-w-[85%] ${msg.role === "user" ? "items-end" : ""}`}
+              className={`max-w-[85%] px-4 py-3 rounded-2xl ${
+                msg.role === "user"
+                  ? "bg-accent text-white rounded-tr-none shadow-sm"
+                  : "bg-white text-text rounded-tl-none border border-border shadow-sm"
+              }`}
             >
-              {msg.role === "assistant" && (
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-bold text-black dark:text-black-300">
-                    Socratic Tutor
-                  </span>
-                </div>
-              )}
-
-              {msg.role === "user" ? (
-                <div className="bg-black  p-3.5 rounded-2xl rounded-br-none shadow-md">
-                  <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap">
-                    {msg.content}
-                  </p>
-                </div>
-              ) : (
-                <>
-                  {msg.content ? (
-                    <div className="bg-black  dark:bg-surface-dark border-2 border-slate-900 dark:border-slate-500 p-4 rounded-xl rounded-tl-none shadow-neubrutalism text-slate-900 dark:text-slate-100">
-                      <p className="leading-relaxed whitespace-pre-wrap">
-                        {msg.content}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="bg-white dark:bg-surface-dark border-2 border-slate-900 dark:border-slate-500 p-3 rounded-xl rounded-tl-none shadow-neubrutalism text-slate-900 dark:text-slate-100 flex items-center gap-3 w-fit">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                        <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
-                      </div>
-                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                        Thinking locally...
+              <div className="text-[15px] leading-relaxed whitespace-pre-wrap">
+                {msg.content || (
+                   <span className="flex items-center gap-2 text-text-subtle italic">
+                     <span className="flex space-x-1">
+                        <span className="w-1 h-1 bg-accent rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                        <span className="w-1 h-1 bg-accent rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                        <span className="w-1 h-1 bg-accent rounded-full animate-bounce"></span>
                       </span>
-                    </div>
-                  )}
-                </>
-              )}
+                      Thinking...
+                   </span>
+                )}
+              </div>
             </div>
           </div>
         ))}
-        {/* Spacer for input area scrolling */}
-        <div className="h-4"></div>
       </main>
 
       {/* Bottom Input Area */}
-      <footer className="bg-surface-light dark:bg-surface-dark border-t-2 border-slate-900 dark:border-slate-700 p-4 pb-8 sticky bottom-0 z-50">
-        <div className="flex gap-3 items-end relative">
-          <div className="flex-1 relative">
-            <input
-              type="text"
+      <footer className="bg-white border-t border-border p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shrink-0">
+        <div className="max-w-3xl mx-auto flex gap-3 items-end">
+          <div className="flex-1 relative group">
+            <textarea
+              rows={1}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={isGenerating}
-              placeholder={
-                isGenerating ? "AI is thinking..." : "Type your question..."
-              }
-              className="w-full bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3.5 pr-14 text-base focus:outline-none focus:border-primary focus:ring-0 resize-none overflow-hidden min-h-[52px] text-slate-900 dark:text-slate-100 placeholder-slate-400 disabled:opacity-50"
+              placeholder="Ask a question..."
+              className="w-full bg-surface border border-border rounded-2xl px-4 py-3 pr-12 text-[15px] focus:outline-none focus:border-accent focus:bg-white transition-all resize-none max-h-32 disabled:opacity-50"
             />
             <button
               onClick={handleSend}
               disabled={isGenerating || !input.trim()}
-              className="absolute right-2 bottom-2 bg-primary hover:bg-primary-dark text-white rounded-lg p-2 transition-colors flex items-center justify-center shadow-sm disabled:opacity-40"
+              className="absolute right-2 bottom-2 size-8 bg-accent text-white rounded-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-30 disabled:hover:scale-100 shadow-sm"
             >
-              <span className="material-symbols-outlined text-[20px]">
-                send
-              </span>
+              <Send size={18} />
             </button>
           </div>
         </div>
