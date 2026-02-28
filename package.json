@@ -1,0 +1,12 @@
+{
+  "name": "invisible-schoolhouse",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "download-model": "cd server && npm run download-model",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "build": "cd client && npm run build",
+    "start": "cd server && npm run start"
+  }
+}

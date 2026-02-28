@@ -10,6 +10,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^5.1.0",
+    "react-router-dom": "^7.13.1",
     "selfsigned": "^5.5.0"
   },
   "devDependencies": {
