@@ -1,13 +1,23 @@
-import { Routes, Route } from "react-router-dom";
-import StudentApp from "./pages/StudentApp";
-import TeacherDashboard from "./pages/TeacherDashboard";
+import { useWebLLM } from "./hooks/useWebLLM";
+import GpuCheck from "./components/GpuCheck";
+import ModelLoader from "./components/ModelLoader";
+import ChatPage from "./components/ChatPage";
 
-export default function App() {
-  return (
-    <Routes>
-      <Route path="/" element={<StudentApp />} />
-      <Route path="/teacher" element={<TeacherDashboard />} />
-    </Routes>
-  );
+function App() {
+  const { engine, isLoading, progress, error, isModelCached } = useWebLLM();
+
+  // WebGPU or adapter error
+  if (error) {
+    return <GpuCheck error={error} />;
+  }
+
+  // Model is still downloading / loading
+  if (isLoading || !engine) {
+    return <ModelLoader progress={progress} isModelCached={isModelCached} />;
+  }
+
+  // Ready — show chat
+  return <ChatPage engine={engine} />;
 }
 
+export default App;
