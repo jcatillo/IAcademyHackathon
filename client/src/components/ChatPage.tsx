@@ -1,6 +1,13 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import type { WebWorkerMLCEngine } from "@mlc-ai/web-llm";
 import { SYSTEM_PROMPT } from "../lib/engine-config";
+import {
+  SUBJECT_PROMPTS,
+  SUBJECT_META,
+  LESSONS,
+  type Subject,
+} from "../lib/subjects";
 
 interface Message {
   role: "user" | "assistant";
@@ -12,6 +19,25 @@ interface ChatPageProps {
 }
 
 export default function ChatPage({ engine }: ChatPageProps) {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const subjectParam = searchParams.get("subject") as Subject | null;
+  const lessonId = searchParams.get("lesson");
+
+  // Resolve subject & lesson context
+  const subject =
+    subjectParam && subjectParam in SUBJECT_META ? subjectParam : null;
+  const lesson = lessonId ? LESSONS.find((l) => l.id === lessonId) : null;
+  const meta = subject ? SUBJECT_META[subject] : null;
+
+  // Build the system prompt with subject context
+  const systemPrompt = useMemo(() => {
+    let prompt = subject ? SUBJECT_PROMPTS[subject] : SYSTEM_PROMPT;
+    if (lesson) {
+      prompt += `\n\nThe student is currently studying: "${lesson.title}" (Week ${lesson.week}, Chapter ${lesson.chapter} of ${lesson.totalChapters}). Tailor your questions and hints to this topic.`;
+    }
+    return prompt;
+  }, [subject, lesson]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -38,7 +64,7 @@ export default function ChatPage({ engine }: ChatPageProps) {
     try {
       // Build the full conversation with system prompt
       const chatMessages = [
-        { role: "system" as const, content: SYSTEM_PROMPT },
+        { role: "system" as const, content: systemPrompt },
         ...updatedMessages.map((m) => ({
           role: m.role as "user" | "assistant",
           content: m.content,
@@ -95,16 +121,33 @@ export default function ChatPage({ engine }: ChatPageProps) {
     <div className="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased overflow-hidden h-screen w-full flex flex-col relative">
       {/* Top App Bar */}
       <header className="flex items-center bg-surface-light dark:bg-surface-dark px-4 py-3 border-b-2 border-slate-900 dark:border-slate-700 sticky top-0 z-50">
-        <button className="flex size-10 shrink-0 items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex size-10 shrink-0 items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+        >
           <span className="material-symbols-outlined text-slate-900 dark:text-slate-100">
             arrow_back
           </span>
         </button>
         <div className="flex-1 flex flex-col items-center justify-center">
           <h2 className="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight">
-            The Invisible Schoolhouse
+            {lesson
+              ? lesson.title
+              : subject
+                ? `${meta!.label} Tutor`
+                : "AI Tutor"}
           </h2>
           <div className="flex items-center gap-1.5 mt-0.5">
+            {subject && meta && (
+              <span
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${meta.bgColor} ${meta.color} mr-1`}
+              >
+                <span className="material-symbols-outlined text-[12px]">
+                  {meta.icon}
+                </span>
+                {meta.label}
+              </span>
+            )}
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
@@ -114,11 +157,7 @@ export default function ChatPage({ engine }: ChatPageProps) {
             </span>
           </div>
         </div>
-        <button className="flex size-10 shrink-0 items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-          <span className="material-symbols-outlined text-slate-900 dark:text-slate-100">
-            more_vert
-          </span>
-        </button>
+        <div className="w-10" /> {/* spacer for symmetry */}
       </header>
 
       {/* Offline Indicator Banner */}
@@ -147,16 +186,21 @@ export default function ChatPage({ engine }: ChatPageProps) {
             <div className="flex flex-col items-center gap-4 opacity-70">
               <div className="bg-primary aspect-square rounded-2xl border-4 border-slate-900 dark:border-slate-100 w-20 flex items-center justify-center shadow-neubrutalism">
                 <span className="material-symbols-outlined text-white text-5xl">
-                  psychology
+                  {meta ? meta.icon : "psychology"}
                 </span>
               </div>
               <div className="text-center space-y-2">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                  Socratic Tutor Ready
+                  {subject
+                    ? `${meta!.label} Tutor Ready`
+                    : "Socratic Tutor Ready"}
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400 max-w-xs">
-                  Ask me a math or reading question! Try: "How do I solve 2x =
-                  10?"
+                  {lesson
+                    ? `Let's work on "${lesson.title}". Ask me anything about this topic!`
+                    : subject
+                      ? `Ask me any ${meta!.label.toLowerCase()} question! I'll guide you step by step.`
+                      : 'Ask me a math or reading question! Try: "How do I solve 2x = 10?"'}
                 </p>
               </div>
             </div>
@@ -181,14 +225,14 @@ export default function ChatPage({ engine }: ChatPageProps) {
             >
               {msg.role === "assistant" && (
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                  <span className="text-xs font-bold text-black dark:text-black-300">
                     Socratic Tutor
                   </span>
                 </div>
               )}
 
               {msg.role === "user" ? (
-                <div className="bg-primary text-white p-3.5 rounded-2xl rounded-br-none shadow-md">
+                <div className="bg-black  p-3.5 rounded-2xl rounded-br-none shadow-md">
                   <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap">
                     {msg.content}
                   </p>
@@ -196,7 +240,7 @@ export default function ChatPage({ engine }: ChatPageProps) {
               ) : (
                 <>
                   {msg.content ? (
-                    <div className="bg-white dark:bg-surface-dark border-2 border-slate-900 dark:border-slate-500 p-4 rounded-xl rounded-tl-none shadow-neubrutalism text-slate-900 dark:text-slate-100">
+                    <div className="bg-black  dark:bg-surface-dark border-2 border-slate-900 dark:border-slate-500 p-4 rounded-xl rounded-tl-none shadow-neubrutalism text-slate-900 dark:text-slate-100">
                       <p className="leading-relaxed whitespace-pre-wrap">
                         {msg.content}
                       </p>
@@ -225,11 +269,6 @@ export default function ChatPage({ engine }: ChatPageProps) {
       {/* Bottom Input Area */}
       <footer className="bg-surface-light dark:bg-surface-dark border-t-2 border-slate-900 dark:border-slate-700 p-4 pb-8 sticky bottom-0 z-50">
         <div className="flex gap-3 items-end relative">
-          <button className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl p-3 border-2 border-transparent hover:border-slate-300 dark:hover:border-slate-600 transition-colors flex items-center justify-center h-[52px] w-[52px]">
-            <span className="material-symbols-outlined">
-              add_photo_alternate
-            </span>
-          </button>
           <div className="flex-1 relative">
             <input
               type="text"
@@ -238,9 +277,9 @@ export default function ChatPage({ engine }: ChatPageProps) {
               onKeyDown={handleKeyDown}
               disabled={isGenerating}
               placeholder={
-                isGenerating ? "AI is thinking..." : "Type your answer..."
+                isGenerating ? "AI is thinking..." : "Type your question..."
               }
-              className="w-full bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3.5 pr-12 text-base focus:outline-none focus:border-primary focus:ring-0 resize-none overflow-hidden min-h-[52px] text-slate-900 dark:text-slate-100 placeholder-slate-400 disabled:opacity-50"
+              className="w-full bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-xl px-4 py-3.5 pr-14 text-base focus:outline-none focus:border-primary focus:ring-0 resize-none overflow-hidden min-h-[52px] text-slate-900 dark:text-slate-100 placeholder-slate-400 disabled:opacity-50"
             />
             <button
               onClick={handleSend}

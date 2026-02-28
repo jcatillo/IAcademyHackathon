@@ -1,65 +1,107 @@
 import { useState } from "react";
 import { usePwaInstall } from "../hooks/usePwaInstall";
 
-export default function InstallPrompt() {
-  const { isInstalled, isIOS, promptInstall } = usePwaInstall();
-  const [showManualSteps, setShowManualSteps] = useState(false);
+const INSTALLED_KEY = "invisible-schoolhouse-installed";
 
-  if (isInstalled) return null;
+interface InstallPromptProps {
+  /** Called when user finishes the install flow (native install, or skip) */
+  onDone: () => void;
+}
 
-  if (isIOS) {
-    return (
-      <div className="w-full max-w-sm rounded-2xl bg-gray-800 p-4 ring-1 ring-white/10">
-        <div className="flex items-start gap-3">
-          <span className="text-2xl">📲</span>
-          <div>
-            <p className="text-sm font-semibold text-white">
-              Install Tutor App
-            </p>
-            <p className="mt-1 text-xs leading-relaxed text-gray-400">
-              Tap{" "}
-              <span className="inline-flex items-center gap-0.5 rounded bg-white/10 px-1.5 py-0.5 font-medium text-white">
-                <ShareIcon /> Share
-              </span>{" "}
-              then select{" "}
-              <span className="font-medium text-white">
-                "Add to Home Screen"
-              </span>
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+export default function InstallPrompt({ onDone }: InstallPromptProps) {
+  const { isInstallable, isInstalled, isIOS, promptInstall } = usePwaInstall();
+  const [showManual, setShowManual] = useState(false);
+  const [installing, setInstalling] = useState(false);
+
+  // Already installed (e.g. running as standalone PWA)
+  // or user previously completed this screen
+  if (isInstalled || localStorage.getItem(INSTALLED_KEY) === "true") {
+    // auto-advance
+    onDone();
+    return null;
   }
 
-  const handleClick = async () => {
-    const accepted = await promptInstall();
-    // If promptInstall returned false, the native event never fired
-    // Show manual fallback instructions instead
-    if (!accepted) {
-      setShowManualSteps(true);
+  const handleInstall = async () => {
+    setInstalling(true);
+
+    if (isInstallable) {
+      // Native Chrome install prompt available
+      const accepted = await promptInstall();
+      if (accepted) {
+        localStorage.setItem(INSTALLED_KEY, "true");
+        onDone();
+        return;
+      }
     }
+
+    // Native prompt not available or was dismissed — show manual steps
+    setShowManual(true);
+    setInstalling(false);
+  };
+
+  const handleSkip = () => {
+    localStorage.setItem(INSTALLED_KEY, "true");
+    onDone();
   };
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <button
-        onClick={handleClick}
-        className="flex items-center gap-2 rounded-xl bg-sky-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-600/25 transition hover:bg-sky-500 active:scale-95"
-      >
-        <span className="text-lg">📥</span>
-        Install Tutor App
-      </button>
+    <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-gray-950 px-6 text-center">
+      {/* Success badge */}
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10 ring-1 ring-emerald-500/30">
+        <span className="text-3xl">✅</span>
+      </div>
 
-      {showManualSteps && (
-        <div className="w-full max-w-sm rounded-2xl bg-amber-900/20 p-4 ring-1 ring-amber-500/20">
+      <div className="max-w-sm">
+        <h1 className="text-xl font-bold text-white">AI Tutor Ready</h1>
+        <p className="mt-2 text-sm leading-relaxed text-gray-400">
+          The AI model and app are saved to your device. Install it so you can
+          open it anytime —{" "}
+          <span className="font-medium text-white">
+            even without Wi-Fi or the teacher's server
+          </span>
+          .
+        </p>
+      </div>
+
+      {/* iOS instructions */}
+      {isIOS && (
+        <div className="w-full max-w-sm rounded-2xl bg-gray-800 p-4 ring-1 ring-white/10 text-left">
+          <p className="text-sm font-semibold text-white">
+            📲 Add to Home Screen
+          </p>
+          <p className="mt-1 text-xs leading-relaxed text-gray-400">
+            Tap{" "}
+            <span className="inline-flex items-center gap-0.5 rounded bg-white/10 px-1.5 py-0.5 font-medium text-white">
+              <ShareIcon /> Share
+            </span>{" "}
+            then select{" "}
+            <span className="font-medium text-white">"Add to Home Screen"</span>
+          </p>
+        </div>
+      )}
+
+      {/* Install button */}
+      {!isIOS && (
+        <button
+          onClick={handleInstall}
+          disabled={installing}
+          className="flex items-center gap-2 rounded-xl bg-sky-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-sky-600/25 transition hover:bg-sky-500 active:scale-95 disabled:opacity-50"
+        >
+          <span className="text-lg">📥</span>
+          {installing ? "Installing…" : "Install App"}
+        </button>
+      )}
+
+      {/* Manual fallback instructions */}
+      {showManual && (
+        <div className="w-full max-w-sm rounded-2xl bg-amber-900/20 p-4 ring-1 ring-amber-500/20 text-left">
           <p className="text-sm font-semibold text-amber-300">
-            Install Manually
+            Add to Home Screen manually
           </p>
           <ol className="mt-2 space-y-1 text-xs leading-relaxed text-gray-400">
             <li>
               1. Tap the <span className="font-medium text-white">⋮ menu</span>{" "}
-              (top-right in Chrome)
+              (top-right corner in Chrome)
             </li>
             <li>
               2. Select{" "}
@@ -74,6 +116,14 @@ export default function InstallPrompt() {
           </ol>
         </div>
       )}
+
+      {/* Skip / Continue */}
+      <button
+        onClick={handleSkip}
+        className="text-xs text-gray-500 underline decoration-gray-700 underline-offset-2 transition hover:text-gray-300"
+      >
+        {showManual || isIOS ? "Continue to Chat →" : "Skip for now"}
+      </button>
     </div>
   );
 }

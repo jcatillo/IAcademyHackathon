@@ -8,10 +8,52 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: "prompt",
-      injectRegister: false, // We register manually in main.tsx (skip on LAN IPs)
+      registerType: "autoUpdate",
+      injectRegister: false, // We register manually in main.tsx with error handling
       workbox: {
-        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB — WebLLM bundle is large
+        maximumFileSizeToCacheInBytes: 300 * 1024 * 1024, // Allow large model files
+        // Serve cached index.html for all navigation requests when offline
+        navigateFallback: "index.html",
+        navigateFallbackDenylist: [/^\/models/, /^\/wasm/],
+        runtimeCaching: [
+          {
+            // Cache page assets (JS, CSS, images) on first load
+            urlPattern: /\.(?:js|css|png|svg|ico|woff2?)$/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "app-assets",
+              expiration: { maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60 },
+            },
+          },
+          {
+            // Cache the WebGPU WASM binary so engine can init offline
+            urlPattern: /\/wasm\/.+\.wasm$/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "wasm-cache",
+              expiration: { maxEntries: 5, maxAgeSeconds: 90 * 24 * 60 * 60 },
+            },
+          },
+          {
+            // Cache model config JSONs (mlc-chat-config.json, ndarray-cache.json)
+            urlPattern: /\/models\/.+\.json$/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "model-config-cache",
+              expiration: { maxEntries: 20, maxAgeSeconds: 90 * 24 * 60 * 60 },
+            },
+          },
+          {
+            // Cache model weight shards (.bin) as fallback to WebLLM's IndexedDB
+            urlPattern: /\/models\/.+\.bin$/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "model-weights-cache",
+              expiration: { maxEntries: 200, maxAgeSeconds: 90 * 24 * 60 * 60 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
       },
       manifest: {
         name: "The Invisible Schoolhouse",

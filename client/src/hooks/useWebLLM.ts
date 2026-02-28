@@ -97,7 +97,18 @@ export function useWebLLM(): UseWebLLMReturn {
         setProgress({ percent: 100, text: "Model ready!" });
       } catch (err: any) {
         console.error("WebLLM init failed:", err);
-        setError(err?.message ?? "Failed to initialize the AI model.");
+        const msg = err?.message ?? "Failed to initialize the AI model.";
+
+        // If offline and model was supposed to be cached, give a clearer message
+        if (!navigator.onLine) {
+          setError(
+            "You're offline and the AI model isn't fully cached yet. " +
+              "Connect to the Teacher's Hub once to download everything, " +
+              "then it will work offline.",
+          );
+        } else {
+          setError(msg);
+        }
       } finally {
         setIsLoading(false);
       }

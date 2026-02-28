@@ -129,7 +129,7 @@ export default function StudentApp() {
             You're connected to your teacher's local network. Install the app to
             take your tutor offline.
           </p>
-          <InstallPrompt />
+          <InstallPrompt onDone={() => {}} />
         </div>
       )}
     </div>

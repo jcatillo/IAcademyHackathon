@@ -3,16 +3,26 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
 
-// Only register the Service Worker on localhost.
-// Self-signed HTTPS certs (used for LAN WebGPU) cause SW registration to fail.
-// WebLLM's IndexedDB caching works independently — SW is only for PWA install.
-if (
-  "serviceWorker" in navigator &&
-  (window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1")
-) {
+// Register Service Worker on ALL origins (not just localhost).
+// On LAN with self-signed HTTPS:
+//   1st visit: cert warning → accept → SW may fail
+//   2nd visit (reload): cert accepted → SW registers → caches app shell
+//   3rd+ visit: app opens fully offline, no server needed
+if ("serviceWorker" in navigator) {
   import("virtual:pwa-register").then(({ registerSW }) => {
-    registerSW({ immediate: true });
+    registerSW({
+      immediate: true,
+      onRegisteredSW(_swUrl: string) {
+        console.log("[SW] Registered — app will work offline after this.");
+      },
+      onRegisterError(error: Error) {
+        console.warn(
+          "[SW] Registration failed (self-signed cert?).",
+          "Reload the page after accepting the security warning.",
+          error,
+        );
+      },
+    });
   });
 }
 
