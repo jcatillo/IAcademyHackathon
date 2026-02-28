@@ -50,14 +50,22 @@ export default function ChatPage({ engine }: ChatPageProps) {
   const [input, setInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [input]);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
-    scrollRef.current?.scrollTo({
-      top: scrollRef.current.scrollHeight,
-      behavior: "smooth",
-    });
-  }, [messages]);
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, isGenerating]);
 
   async function handleSend() {
     const text = input.trim();
@@ -128,9 +136,9 @@ export default function ChatPage({ engine }: ChatPageProps) {
   const SubjectIcon = meta ? SUBJECT_ICONS[meta.icon] : Brain;
 
   return (
-    <div className="flex flex-col fixed inset-0 bg-primary z-50">
+    <div className="flex flex-col fixed inset-0 h-svh w-full bg-primary z-[100] overflow-hidden">
       {/* Top App Bar */}
-      <header className="flex items-center px-4 py-3 border-b border-border bg-white shrink-0">
+      <header className="flex items-center px-4 py-3 border-b border-border bg-white shrink-0 z-10">
         <button
           onClick={() => navigate(-1)}
           className="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-surface transition-colors"
@@ -138,7 +146,7 @@ export default function ChatPage({ engine }: ChatPageProps) {
           <ArrowLeft size={20} className="text-text" />
         </button>
         <div className="flex-1 flex flex-col items-center">
-          <h2 className="text-text text-base font-bold leading-tight">
+          <h2 className="text-text text-base font-bold leading-tight line-clamp-1 text-center px-2">
             {lesson ? lesson.title : subject ? `${meta!.label} Tutor` : "AI Tutor"}
           </h2>
           <div className="flex items-center gap-1.5 mt-0.5">
@@ -157,10 +165,10 @@ export default function ChatPage({ engine }: ChatPageProps) {
       {/* Chat Area */}
       <main
         ref={scrollRef}
-        className="flex-1 overflow-y-auto p-4 space-y-6 pb-8 bg-surface/30"
+        className="flex-1 overflow-y-auto p-4 space-y-6 bg-surface/30 scroll-smooth"
       >
         {messages.length === 0 && (
-          <div className="flex h-full items-center justify-center p-8">
+          <div className="flex min-h-full items-center justify-center p-8">
             <div className="flex flex-col items-center text-center gap-4 max-w-sm">
               <div className={`p-6 rounded-3xl ${meta ? meta.bgColor : 'bg-accent/5'}`}>
                 {SubjectIcon && <SubjectIcon size={48} className={meta ? meta.color : 'text-accent'} />}
@@ -206,20 +214,23 @@ export default function ChatPage({ engine }: ChatPageProps) {
             </div>
           </div>
         ))}
+        {/* Extra spacer at bottom of list */}
+        <div className="h-2" />
       </main>
 
       {/* Bottom Input Area */}
-      <footer className="bg-white border-t border-border p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shrink-0">
+      <footer className="bg-white border-t border-border p-4 shrink-0 z-10">
         <div className="max-w-3xl mx-auto flex gap-3 items-end">
           <div className="flex-1 relative group">
             <textarea
+              ref={textareaRef}
               rows={1}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={isGenerating}
               placeholder="Ask a question..."
-              className="w-full bg-surface border border-border rounded-2xl px-4 py-3 pr-12 text-[15px] focus:outline-none focus:border-accent focus:bg-white transition-all resize-none max-h-32 disabled:opacity-50"
+              className="w-full bg-surface border border-border rounded-2xl px-4 py-3 pr-12 text-[15px] focus:outline-none focus:border-accent focus:bg-white transition-all resize-none max-h-32 disabled:opacity-50 min-h-[48px]"
             />
             <button
               onClick={handleSend}
@@ -230,6 +241,8 @@ export default function ChatPage({ engine }: ChatPageProps) {
             </button>
           </div>
         </div>
+        {/* Mobile safe area spacing */}
+        <div className="h-[env(safe-area-inset-bottom)]" />
       </footer>
     </div>
   );

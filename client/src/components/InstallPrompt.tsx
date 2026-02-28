@@ -56,7 +56,8 @@ export default function InstallPrompt({ onDone }: InstallPromptProps) {
         <h1 className="text-3xl font-bold tracking-tight">AI Tutor Ready</h1>
         <p className="text-sm leading-relaxed text-text-subtle font-medium">
           The models are synced. Install the app to access your lessons{" "}
-          <span className="font-bold text-accent">anytime, anywhere</span>, even without a network connection.
+          <span className="font-bold text-accent">anytime, anywhere</span>, even
+          without a network connection.
         </p>
       </div>
 
@@ -68,7 +69,12 @@ export default function InstallPrompt({ onDone }: InstallPromptProps) {
             Add to Home Screen
           </p>
           <p className="text-xs leading-relaxed text-text-subtle font-medium">
-            Tap the <span className="bg-white px-2 py-0.5 rounded border border-border inline-flex items-center gap-1 font-bold text-accent"><ShareIcon /> share button</span> then select <span className="font-bold text-text">"Add to Home Screen"</span>.
+            Tap the{" "}
+            <span className="bg-white px-2 py-0.5 rounded border border-border inline-flex items-center gap-1 font-bold text-accent">
+              <ShareIcon /> share button
+            </span>{" "}
+            then select{" "}
+            <span className="font-bold text-text">"Add to Home Screen"</span>.
           </p>
         </div>
       )}
@@ -97,11 +103,20 @@ export default function InstallPrompt({ onDone }: InstallPromptProps) {
           <ol className="space-y-3 text-xs text-amber-900/70 font-medium">
             <li className="flex gap-2">
               <span className="font-bold text-amber-700">1.</span>
-              <span>Open the <span className="font-bold">browser menu</span> (the three dots ⋮ in the top corner)</span>
+              <span>
+                Open the <span className="font-bold">browser menu</span> (the
+                three dots ⋮ in the top corner)
+              </span>
             </li>
             <li className="flex gap-2">
               <span className="font-bold text-amber-700">2.</span>
-              <span>Select <span className="font-bold text-text">"Install app"</span> or <span className="font-bold text-text">"Add to Home Screen"</span></span>
+              <span>
+                Select{" "}
+                <span className="font-bold text-text">"Install app"</span> or{" "}
+                <span className="font-bold text-text">
+                  "Add to Home Screen"
+                </span>
+              </span>
             </li>
             <li className="flex gap-2">
               <span className="font-bold text-amber-700">3.</span>
@@ -119,24 +134,6 @@ export default function InstallPrompt({ onDone }: InstallPromptProps) {
         {showManual || isIOS ? "Continue to Hub →" : "Skip for now"}
       </button>
     </div>
-  );
-}
-
-function ShareIcon() {
-  return (
-    <svg
-      className="h-3.5 w-3.5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      viewBox="0 0 24 24"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 3v12M8 7l4-4 4 4"
-      />
-    </svg>
   );
 }
 
